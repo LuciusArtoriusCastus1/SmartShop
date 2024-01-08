@@ -1,0 +1,96 @@
+{% extends 'core/base.html'%}
+
+{% block content %}
+    <div class="grid grid-cols-4 gap-3">
+        <div class="row-span-6" style="overflow: scroll; height: 800px;">
+            <form method="get" action="{% url 'filter' %}">
+                <p class="font-semibold">Order By</p>
+                    <select name="order" class="w-full px-6 py-3 border rounded-xl">
+                        <option class="py-2 border px-2 rounded-xl bg-blue-200" value="post_date">New first</option>
+                        <option class="py-2 border px-2 rounded-xl bg-blue-200" value="sold">Best selling</option>
+                        <option class="py-2 border px-2 rounded-xl bg-blue-200" value="price_cheap">Cheap first</option>
+                        <option class="py-2 border px-2 rounded-xl bg-blue-200" value="price_exp">Expensive first</option>
+                        <option class="py-2 border px-2 rounded-xl bg-blue-200" value="rate">Rating</option>
+                    </select>
+                <p class="font-semibold">Search</p>
+
+                <input name="query" class="w-full px-6 py-3 border rounded-xl" type="text" placeholder="What a wonderful day?">
+
+                <p class="font-semibold">Price</p>
+
+                <input class="py-2 border px-2 rounded-xl bg-blue-200" type="number" name="min_price" placeholder="Enter min price">
+                <input class="py-2 border px-2 rounded-xl bg-blue-200" type="number" name="max_price" placeholder="Enter max price">
+
+                <p class="font-semibold">Categories</p>
+                <ul>
+                    {% for category in categories %}
+                        <li class="py-2 border px-2 rounded-xl bg-blue-200">
+                            <input type="checkbox" name="category" value="{{ category }}">
+                            <span>{{ category.name }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <p class="font-semibold">Made In</p>
+                <ul>
+                    {% for country in made_in %}
+                        <li class="py-2 border px-2 rounded-xl bg-blue-200">
+                            <input type="checkbox" name="country" value="{{ country }}">
+                            <span >{{ country.name }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <p class="font-semibold">Manufacture Year</p>
+                <ul>
+                    {% for year in manufacture_year %}
+                        <li class="py-2 border px-2 rounded-xl bg-blue-200">
+                            <input type="checkbox" name="year" value="{{ year }}">
+                            <span >{{ year.name }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <p class="font-semibold">Rating</p>
+                <ul>
+                    {% for rate in rating %}
+                        <li class="py-2 border px-2 rounded-xl bg-blue-200">
+                            <input type="checkbox" name="rate" value="{{ rate }}">
+                            <span >{{ rate.star|add:'-1'}} - {{ rate.star}}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <button type="submit" class="py-4 px-8 text-lg bg-teal-500 hover:bg-teal-700 rounded-xl text-white">Submit</button>
+            </form>
+        </div>
+        {% for p in products %}
+            <div class="">
+                <a href="{% url 'product_detail' p.slug %}">
+                    <div>
+                        {% if p.photo.url != None %}
+                            <img src="{{ p.photo.url }}" class="rounded-t-xl max-w-xs max-h-64">
+                        {% endif %}
+                    </div>
+
+                    <div class="p-6 bg-white rounded-b-xl">
+                        <h2 class="text-2xl">{{ p.name }}</h2>
+                        {% if p.newable == True %}
+                            <p class="bg-blue   -300 rounded-xl text-red-700"><b>NEW</b></p>
+                        {% endif %}
+                        <p class="text-gray-500" >Category: {{ p.category }}</p>
+                        <p class="text-gray-500">Price: {{ p.price }}</p>
+                        {% if p.discount %}
+                        <p class="text-gray-500">Discount: {{ p.discount }}</p>
+                        {% endif %}
+                        <p class="text-gray-500">Amount: {{ p.amount }}</p>
+                        <p class="text-gray-500">Added: {{ p.post_date }}</p>
+                        {% if p.average_rate != None %}
+                            <p class="text-gray-500">Rating: {{ p.average_rate }}/10</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}

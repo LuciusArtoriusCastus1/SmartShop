@@ -1,0 +1,124 @@
+{% load bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<nav class="py-6 px-6 flex justify-between items-center border-b border-gray-200">
+    <a href="{% url 'index' %}" class="text-xl font-semibold"><b>SmartShop</b></a>
+    <form method="get" class="flex justify-between items-center" action="{% url 'filter' %}">
+        <input name="query" class="w-full px-6 py-3 border rounded-xl" type="text" placeholder="Wanna suicide?">
+        <button class="px-6 py-3 text-lg bg-teal-500 text-white rounded-xl">Search</button>
+    </form>
+    {% if request.user.is_authenticated %}
+        {% if request.user.seller_status %}
+            <div class="space-x-6 flex">
+                <div class="dropdown">
+                  <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    New Product
+                  </a>
+
+                  <ul class="dropdown-menu">
+                      {% for cat in categories %}
+                        <li><a class="dropdown-item" href="{% url 'add_product' cat.slug %}">{{ cat }}</a></li>
+                      {% endfor %}
+                  </ul>
+                </div>
+
+                <div class="">
+                    <a href="{% url 'dashboard' %}" class="text-lg font-semibold px-6 py-3 bg-pink-400 hover:bg-gray-500 rounded-xl">Your Items</a>
+                </div>
+            {% endif %}
+            <div class="">
+                <a href="{% url 'cart_list' %}" class="text-lg font-semibold px-6 py-3 bg-pink-400 hover:bg-gray-500 rounded-xl">Cart</a>
+            </div>
+
+            <div class="">
+                <a href="{% url 'inbox' %}" class="text-lg font-semibold px-6 py-3 bg-pink-400 hover:bg-gray-500 rounded-xl">Inbox</a>
+            </div>
+        </div>
+    {% else %}
+        <div>
+            <a class="btn btn-primary " href="{% url 'signup' %}" role="button" >
+                New Product
+              </a>
+        </div>
+
+        <div class="">
+            <a href="{% url 'signup' %}" class="text-lg font-semibold px-6 py-3 bg-pink-400 hover:bg-gray-500 rounded-xl">Your Items</a>
+        </div>
+
+        <div class="">
+            <a href="{% url 'signup' %}" class="text-lg font-semibold px-6 py-3 bg-pink-400 hover:bg-gray-500 rounded-xl">Cart</a>
+        </div>
+
+        <div class="">
+            <a href="{% url 'signup' %}" class="text-lg font-semibold px-6 py-3 bg-pink-400 hover:bg-gray-500 rounded-xl">Inbox</a>
+        </div>
+    {% endif %}
+    {% if request.user.is_authenticated %}
+        <div class="flex">
+         <a href="" class="px-6 py-3 text-lg font-semibold bg-blue-500 text-white rounded-xl hover:bg-blue-700">{{ user.display_name }}</a>
+         {% if user.profile_image %}
+             <div class="px-1">
+                <img class="w-10 rounded-xl" src='{{ user.profile_image.url }}'>
+             </div>
+         {% endif %}
+         {% if not request.user.seller_status %}
+             <a href="{% url 'upgradeuser' user.pk %}" class="px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl hover:bg-read-700">Upgrade To Seller?</a>
+         {% endif %}
+         <a href="{% url 'logout' %}" class="px-6 py-3 text-lg font-semibold bg-green-500 text-white rounded-xl hover:bg-green-700">Log Out</a>
+        </div>
+    {% else %}
+        <div class="flex">
+            <div class="flex px-2">
+                 <a href="{% url 'signup' %}" class="px-6 py-3 text-lg font-semibold bg-orange-500 text-white rounded-xl hover:bg-orange-700">Sign Up</a>
+            </div>
+            <div class="flex">
+                 <a href="{% url 'login' %}" class="px-6 py-3 text-lg font-semibold bg-yellow-500 text-white rounded-xl hover:bg-yellow-700">Log In</a>
+            </div>
+        </div>
+    {% endif %}
+</nav>
+
+{% block content %}
+{% endblock content %}
+
+    {% if page_obj.has_other_pages %}
+        <nav class="bg-light p-2 rounded">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{{ order_url }}{{ cat_url }}{{ made_in_url }}{{ year_url }}{{ rate_url }}{{ query_url }}{{ min_price_url }}{{ max_price_url }}page={{ page_obj.previous_page_number }}">&lt;</a>
+                    </li>
+                {% endif %}
+
+                {% for p in paginator.page_range %}
+                    {% if page_obj.number == p %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ p }}</span>
+                        </li>
+                    {% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2  %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{{ order_url }}{{ cat_url }}{{ made_in_url }}{{ year_url }}{{ rate_url }}{{ query_url }}{{ min_price_url }}{{ max_price_url }}page={{ p }}">{{ p }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{{ order_url }}{{ cat_url }}{{ made_in_url }}{{ year_url }}{{ rate_url }}{{ query_url }}{{ min_price_url }}{{ max_price_url }}page={{ page_obj.next_page_number }}">&gt;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+</body>
+</html>

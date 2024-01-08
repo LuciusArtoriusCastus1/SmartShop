@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+    <h1 class="mb-6 text-3xl">Inbox</h1>
+
+    <div class="space-y-6">
+        {% for chat in chat_rooms %}
+            <div class="p-6 space-x-96 flex bg-gray-300 rounded-xl">
+                <div class="bg-gray-100 rounded-xl mr-96">
+                    <a href="{% url 'chat_detail' chat.id %}">
+                    <div class="pr-6">
+                        {% if chat.product.photo %}
+                            <img src="{{ chat.product.photo.url }}" class="w-20 rounded-xl">
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        {% for member in chat.members.all %}
+                            {% if member != request.user %}
+                                <p class="mb-4"><strong>{{ member.display_name }}</strong> | {{ chat.updated_at }}</p>
+                                <p>{{ chat.product.name }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    </a>
+                </div>
+
+                <div class="pl-96">
+                    <a href="{% url 'delete_chat' chat_id=chat.id %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock content %}

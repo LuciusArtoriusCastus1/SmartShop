@@ -1,0 +1,297 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <div class="grid grid-cols-5 gap-6">
+        <div class="col-span-3">
+            <img src="{{ product.photo.url }}" class="max-w-xs rounded-xl">
+        </div>
+
+        <div class="col-span-2 p-6 bg-gray-100 rounded-xl">
+
+            <h1 class="mb-6 text-3xl">{{ product.name }}</h1>
+            {% if product.newable == True %}
+                <p class="mb-6 bg-blue-300 rounded-xl text-2xl text-red-700"><b>NEW</b></p>
+            {% endif %}
+            <p class="text-gray-500"><strong>Price: </strong>{{ product.price }}</p>
+            {% if product.discount != None %}
+                <p class="text-gray-500"><strong>Discount: </strong>{{ product.discount }}</p>
+            {% endif %}
+            <p class="text-gray-500"><strong>Amount: </strong>{{ product.amount }}</p>
+            <p class="text-gray-500"><strong>Post Date: </strong>{{ product.post_date }}</p>
+            {% if product.average_rate != None %}
+                <p class="text-gray-500"><strong>Rating: </strong>{{ product.average_rate }}/10</p>
+            {% endif %}
+
+            {% if request.user.is_authenticated %}
+                {% if your_rate != None %}
+                    <a href="{% url 'set_up_rate' product.slug %}"><p class="bg-green-200 rounded-xl text-gray-500"><strong>Your Rate: </strong>{{ your_rate.rate }}/10</p></a>
+                {% else %}
+                    <a href="{% url 'set_up_rate' product.slug %}"><p class="bg-green-200 rounded-xl text-gray-500"><strong>Your Rate: </strong>None</p></a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'signup' %}"><p class="bg-green-200 rounded-xl text-gray-500"><strong>Your Rate: </strong>None</p></a>
+            {% endif %}
+
+            <a href="#"><p class="text-gray-500"><strong>Seller: </strong>{{ product.owner.display_name }}</p></a>
+
+            {% if product.description %}
+                <p class="text-gray-700">
+                    <strong class="text-gray-500">Description:</strong><br>
+                    {{ product.description }}
+                </p>
+            {% endif %}
+
+            {% if request.user == product.owner %}
+                <div class="mt-6 p-6 bg-white rounded-xl">
+                    <p>This is your item!</p>
+
+                    <a href="{% url 'update_product' product=product.slug cat=product.category %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl">Edit</a>
+                    <a href="{% url 'delete_product' product.slug %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl">Delete</a>
+                </div>
+            {% else %}
+                {% if request.user.is_authenticated %}
+                    {% if not cart_added %}
+                        <a href="{% url 'add_to_cart' product.slug %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-green-500 text-white rounded-xl hover:bg-green-700">Add to Cart</a>
+                    {% else %}
+                        <a href="{% url 'delete_from_cart' product.slug %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl hover:bg-red-700">Delete from Cart</a>
+                    {% endif %}
+                    <a href="" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Make Purchase</a>
+                    <a href="{% url 'new_chat_room' product=product.slug %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-yellow-500 text-white rounded-xl hover:bg-yellow-700">Contact seller</a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-red-500 text-white rounded-xl hover:bg-red-700">Add to Cart</a>
+                    <a href="{% url 'signup' %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Make Purchase</a>
+                    <a href="{% url 'signup' %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-yellow-500 text-white rounded-xl hover:bg-yellow-700">Contact seller</a>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% if product.video %}
+        <div class="col-span-3">
+            <video class="max-w-xl rounded-xl" controls>
+                <source src="{{ product.video.url }}" type="video/mp4">
+            </video>
+        </div>
+        {% endif %}
+        {% if attachments %}
+        <div class="col-span-2">
+            <div id="carouselExample" class="carousel slide bg-gray-500 rounded-xl">
+              <div class="carousel-inner flex">
+                  <div class="carousel-item active">
+                      <img src="{{ product.photo.url }}" class="d-block max-h-96 min-h-96 rounded-xl" alt="...">
+                  </div>
+                {% for photo in product.attachments_set.all %}
+                    {% if photo.photo %}
+                    <div class="carousel-item">
+                      <img src="{{ photo.photo.url }}" class="d-block max-h-96 min-h-96 rounded-xl" alt="...">
+                    </div>
+                    {% endif %}
+                {% endfor %}
+              </div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+              </button>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-span-5 space-y-6">
+
+            <div class="bg-red-400 rounded-xl text-3xl "><h1><b>Product Detail</b></h1></div>
+            <ul>
+                {% if product.made_in %}
+                    <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Made In:</strong> {{ product.made_in }}</li>
+                {% endif %}
+                {% if product.screen_diagonal %}
+                    <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Screen Diagonal:</strong> {{ product.screen_diagonal }}</li>
+                {% endif %}
+                {% if product.weight %}
+                    <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Weight:</strong> {{ product.weight }}</li>
+                {% endif %}
+                {% if product.manufacture_year %}
+                    <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Manufacture Year:</strong> {{ product.manufacture_year }}</li>
+                {% endif %}
+                {% if product.color %}
+                    <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Color:</strong> {{ product.color }}</li>
+                {% endif %}
+
+                {% if product.category == 'Laptop' %}
+                    {% if product.laptop_brand %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Brand:</strong> {{ product.laptop_brand }}</li>
+                    {% endif %}
+                    {% if product.laptop_processor %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Processor:</strong> {{ product.laptop_processor }}</li>
+                    {% endif %}
+                    {% if product.laptop_ram %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop RAM:</strong> {{ product.laptop_ram }}</li>
+                    {% endif %}
+                    {% if product.laptop_discrete_graphics_card %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Discrete Graphics Card:</strong> {{ product.laptop_discrete_graphics_card }}</li>
+                    {% endif %}
+                    {% if product.laptop_operating_system %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Operating System:</strong> {{ product.laptop_operating_system }}</li>
+                    {% endif %}
+                    {% if product.laptop_ssd_capacity %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop SSD Capacity:</strong> {{ product.laptop_ssd_capacity }}</li>
+                    {% endif %}
+                    {% if product.laptop_video_card_memory_capacity %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Video Card Memory Capacity:</strong> {{ product.laptop_video_card_memory_capacity }}</li>
+                    {% endif %}
+                    {% if product.laptop_screen_type %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Screen Type:</strong> {{ product.laptop_screen_type }}</li>
+                    {% endif %}
+                    {% if product.laptop_processor_cores %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Processor Cores:</strong> {{ product.laptop_processor_cores }}</li>
+                    {% endif %}
+                    {% if product.laptop_video_card_type %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Video Card Type:</strong> {{ product.laptop_video_card_type }}</li>
+                    {% endif %}
+                    {% if product.laptop_drive_type %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Drive Type:</strong> {{ product.laptop_drive_type }}</li>
+                    {% endif %}
+                    {% if product.laptop_ram_type %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop RAM Type:</strong> {{ product.laptop_ram_type }}</li>
+                    {% endif %}
+                    {% if product.laptop_resolution %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Resolution:</strong> {{ product.laptop_resolution }}</li>
+                    {% endif %}
+                    {% if product.laptop_battery_capacity %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Battery Capacity:</strong> {{ product.laptop_battery_capacity }}</li>
+                    {% endif %}
+                    {% if product.laptop_screen_refresh_rate %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Laptop Screen Refresh Rate:</strong> {{ product.laptop_screen_refresh_rate }}</li>
+                    {% endif %}
+                {% elif product.category == 'Tablet' %}
+
+                          {% if product.number_of_sim_cards %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Number of SIM Cards:</strong> {{ product.number_of_sim_cards }}</li>
+                            {% endif %}
+                            {% if product.tablet_brand %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Brand:</strong> {{ product.tablet_brand }}</li>
+                            {% endif %}
+                            {% if product.tablet_ram %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet RAM:</strong> {{ product.tablet_ram }}</li>
+                            {% endif %}
+                            {% if product.tablet_built_in_memory %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Built-in Memory:</strong> {{ product.tablet_built_in_memory }}</li>
+                            {% endif %}
+                            {% if product.tablet_wireless_capabilities %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Wireless Capabilities:</strong> {{ product.tablet_wireless_capabilities }}</li>
+                            {% endif %}
+                            {% if product.tablet_operating_system %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Operating System:</strong> {{ product.tablet_operating_system }}</li>
+                            {% endif %}
+                            {% if product.tablet_matrix_type %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Matrix Type:</strong> {{ product.tablet_matrix_type }}</li>
+                            {% endif %}
+                            {% if product.tablet_features %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Features:</strong> {{ product.tablet_features }}</li>
+                            {% endif %}
+                            {% if product.tablet_screen_resolution %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Screen Resolution:</strong> {{ product.tablet_screen_resolution }}</li>
+                            {% endif %}
+                            {% if product.tablet_processor_cores %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Processor Cores:</strong> {{ product.tablet_processor_cores }}</li>
+                            {% endif %}
+                            {% if product.tablet_processor %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Processor:</strong> {{ product.tablet_processor }}</li>
+                            {% endif %}
+                            {% if product.tablet_main_camera %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Main Camera:</strong> {{ product.tablet_main_camera }}</li>
+                            {% endif %}
+                            {% if product.tablet_front_camera %}
+                                <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Tablet Front Camera:</strong> {{ product.tablet_front_camera }}</li>
+                            {% endif %}
+
+                {% elif product.category == 'Phone' %}
+
+                    {% if product.number_of_sim_cards %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Number of SIM Cards:</strong> {{ product.number_of_sim_cards }}</li>
+                    {% endif %}
+                    {% if product.phone_brand %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Brand:</strong> {{ product.phone_brand }}</li>
+                    {% endif %}
+                    {% if product.phone_ram %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone RAM:</strong> {{ product.phone_ram }}</li>
+                    {% endif %}
+                    {% if product.phone_built_in_memory %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Built-in Memory:</strong> {{ product.phone_built_in_memory }}</li>
+                    {% endif %}
+                    {% if product.phone_memory_capacity %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Memory Capacity:</strong> {{ product.phone_memory_capacity }}</li>
+                    {% endif %}
+                    {% if product.phone_wireless_technologies %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Wireless Technologies:</strong> {{ product.phone_wireless_technologies }}</li>
+                    {% endif %}
+                    {% if product.phone_main_camera_mp %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Main Camera MP:</strong> {{ product.phone_main_camera_mp }}</li>
+                    {% endif %}
+                    {% if product.phone_main_camera_features %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Main Camera Features:</strong> {{ product.phone_main_camera_features }}</li>
+                    {% endif %}
+                    {% if product.phone_front_camera_mp %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Front Camera MP:</strong> {{ product.phone_front_camera_mp }}</li>
+                    {% endif %}
+                    {% if product.phone_processor_name %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Processor Name:</strong> {{ product.phone_processor_name }}</li>
+                    {% endif %}
+                    {% if product.phone_display_resolution %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Display Resolution:</strong> {{ product.phone_display_resolution }}</li>
+                    {% endif %}
+                    {% if product.phone_matrix_type %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Matrix Type:</strong> {{ product.phone_matrix_type }}</li>
+                    {% endif %}
+                    {% if product.phone_screen_refresh_rate %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Screen Refresh Rate:</strong> {{ product.phone_screen_refresh_rate }}</li>
+                    {% endif %}
+                    {% if product.phone_operating_system %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Operating System:</strong> {{ product.phone_operating_system }}</li>
+                    {% endif %}
+                    {% if product.phone_equipment %}
+                        <li class="p-6 flex bg-blue-100 rounded-xl text-2xl"><strong>Phone Equipment:</strong> {{ product.phone_equipment }}</li>
+                    {% endif %}
+
+                {% endif %}
+            </ul>
+
+            <div class="bg-blue-400 flex rounded-xl text-3xl "><h1><b>Reviews</b></h1></div>
+                <div>
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'add_review' product.slug %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Add Review</a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="inline-block mt-6 px-6 py-3 text-lg font-semibold bg-teal-500 text-white rounded-xl hover:bg-teal-700">Add Review</a>
+                {% endif %}
+                </div>
+                <div>
+                    <form method="get" action="{% url 'product_detail' product.slug %}">
+                        <p class="font-semibold">Order By</p>
+
+                        <select name="order" class="bg-blue-200 px-6 py-3 border rounded-xl">
+                            <option class="py-2 border px-2 rounded-xl bg-blue-200" value="post_date">New first</option>
+                            <option class="py-2 border px-2 rounded-xl bg-blue-200" value="likes">Popular first</option>
+                        </select>
+                        <button type="submit" class="py-3 px-8 text-lg bg-teal-500 hover:bg-blue-700 rounded-xl text-white">Submit</button>
+                    </form>
+                </div>
+                {% for review in reviews %}
+                        <div class="p-6 flex bg-blue-100 rounded-xl text-2xl space-x-96">
+                            <div class="mr-96">
+                                <strong>{{ review.owner }}: </strong> {{ review.post_date }}
+                                <p>{{ review.text }}</p>
+                            </div>
+                            {% if request.user.is_authenticated %}
+                                {% if review in liked_reviews %}
+                                    <div class="text-right bg-red-500 ml-96 rounded-xl px-12"><a href="{% url 'like' review=review.id product=product.slug %}">Likes: {{ review.likes }}</a></div>
+                                {% else %}
+                                    <div class="text-right bg-gray-500 ml-96 rounded-xl px-12"><a href="{% url 'like' review=review.id product=product.slug %}">Likes: {{ review.likes }}</a></div>
+                                {% endif %}
+                            {% else %}
+                                <div class="text-right bg-gray-500 ml-96 rounded-xl px-12"><a href="{% url 'signup' %}">Likes: {{ review.likes }}</a></div>
+                            {% endif %}
+                        </div>
+                {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

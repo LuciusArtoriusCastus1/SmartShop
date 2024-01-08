@@ -1,0 +1,34 @@
+{% extends 'core/base.html'%}
+
+{% block content %}
+    <div class="grid grid-cols-3 gap-3">
+        {% for p in products %}
+            <div class="">
+                <a href="{% url 'product_detail' p.slug %}">
+                    <div>
+                        {% if p.photo.url != None %}
+                            <img src="{{ p.photo.url }}" class="rounded-t-xl max-w-xs max-h-64">
+                        {% endif %}
+                    </div>
+
+                    <div class="p-6 bg-white rounded-b-xl">
+                        <h2 class="text-2xl">{{ p.name }}</h2>
+                        {% if p.newable == True %}
+                            <p class="bg-blue   -300 rounded-xl text-red-700"><b>NEW</b></p>
+                        {% endif %}
+                        <p class="text-gray-500" >Category: {{ p.category }}</p>
+                        <p class="text-gray-500">Price: {{ p.price }}</p>
+                        {% if p.discount %}
+                        <p class="text-gray-500">Discount: {{ p.discount }}</p>
+                        {% endif %}
+                        <p class="text-gray-500">Amount: {{ p.amount }}</p>
+                        <p class="text-gray-500">Added: {{ p.post_date }}</p>
+                        {% if p.average_rate != None %}
+                            <p class="text-gray-500">Rating: {{ p.average_rate }}/10</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock content %}
